@@ -107,14 +107,9 @@ function DroppableColumn({
             </CardTitle>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-white hover:bg-white/20"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open column menu</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem className="text-destructive">
@@ -200,7 +195,7 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   async function handleDragStart(event: DragStartEvent) {
@@ -253,13 +248,13 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
       newOrder = jobsInTarget.length;
     } else if (targetJob) {
       const targetJobColumn = sortedColumns.find((col) =>
-        col.jobApplications.some((j) => j._id === targetJob._id)
+        col.jobApplications.some((j) => j._id === targetJob._id),
       );
       targetColumnId = targetJob.columnId || targetJobColumn?._id || "";
       if (!targetColumnId) return;
 
       const targetColumnObj = sortedColumns.find(
-        (col) => col._id === targetColumnId
+        (col) => col._id === targetColumnId,
       );
 
       if (!targetColumnObj) return;
@@ -271,11 +266,11 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
         allJobsInTargetOriginal.filter((j) => j._id !== activeId) || [];
 
       const targetIndexInOriginal = allJobsInTargetOriginal.findIndex(
-        (j) => j._id === overId
+        (j) => j._id === overId,
       );
 
       const targetIndexInFiltered = allJobsInTargetFiltered.findIndex(
-        (j) => j._id === overId
+        (j) => j._id === overId,
       );
 
       if (targetIndexInFiltered !== -1) {
