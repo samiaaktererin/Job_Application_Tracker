@@ -7,25 +7,22 @@ import { redirect } from "next/navigation";
 
 import { initializeUserBoard } from "../init-user-board";
 
-// Use the native MongoDB driver for Better Auth.
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined in environment variables");
 }
 
-// Reuse the MongoDB connection during development and server reuse.
+// Reuse the native MongoDB client across serverless module reuse
 const globalForMongo = globalThis as typeof globalThis & {
-  mongoClientPromise?: Promise<MongoClient>;
+  mongoClient?: MongoClient;
 };
 
-const clientPromise =
-  globalForMongo.mongoClientPromise ??
-  (globalForMongo.mongoClientPromise = new MongoClient(
-    MONGODB_URI
-  ).connect());
+const client =
+  globalForMongo.mongoClient ??
+  (globalForMongo.mongoClient = new MongoClient(MONGODB_URI));
 
-const client = await clientPromise;
+// Create the database handle without connecting immediately
 const db = client.db();
 
 export const auth = betterAuth({
