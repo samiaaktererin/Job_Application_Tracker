@@ -1,19 +1,29 @@
+
 "use client";
 
 import { JobApplication, Column } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Edit2, ExternalLink, MoreVertical, Plus, Trash2 } from "lucide-react";
+import {
+  Edit2,
+  ExternalLink,
+  MoreVertical,
+  Trash2,
+} from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+
 import { Button } from "./ui/button";
+
 import {
   deleteJobApplication,
   updateJobApplication,
 } from "@/lib/actions/job-applications";
+
 import {
   Dialog,
   DialogContent,
@@ -22,10 +32,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import React, { useState } from "react";
+
 interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
@@ -38,6 +50,7 @@ export default function JobApplicationCard({
   dragHandleProps,
 }: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+
   const [formData, setFormData] = useState({
     company: job.company,
     position: job.position,
@@ -52,6 +65,7 @@ export default function JobApplicationCard({
 
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     try {
       const result = await updateJobApplication(job._id, {
         ...formData,
@@ -65,7 +79,7 @@ export default function JobApplicationCard({
         setIsEditing(false);
       }
     } catch (err) {
-      console.error("Failed to move job application: ", err);
+      console.error("Failed to update job application:", err);
     }
   }
 
@@ -77,7 +91,7 @@ export default function JobApplicationCard({
         console.error("Failed to delete job application:", result.error);
       }
     } catch (err) {
-      console.error("Failed to move job application: ", err);
+      console.error("Failed to delete job application:", err);
     }
   }
 
@@ -86,10 +100,15 @@ export default function JobApplicationCard({
       const result = await updateJobApplication(job._id, {
         columnId: newColumnId,
       });
+
+      if (result.error) {
+        console.error("Failed to move job application:", result.error);
+      }
     } catch (err) {
-      console.error("Failed to move job application: ", err);
+      console.error("Failed to move job application:", err);
     }
   }
+
   return (
     <>
       <Card
@@ -99,15 +118,20 @@ export default function JobApplicationCard({
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm mb-1">{job.position}</h3>
+              <h3 className="font-semibold text-sm mb-1">
+                {job.position}
+              </h3>
+
               <p className="text-xs text-muted-foreground mb-2">
                 {job.company}
               </p>
+
               {job.description && (
                 <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                   {job.description}
                 </p>
               )}
+
               {job.tags && job.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-2">
                   {job.tags.map((tag, index) => (
@@ -120,46 +144,53 @@ export default function JobApplicationCard({
                   ))}
                 </div>
               )}
+
               {job.jobUrl && (
                 <a
                   href={job.jobUrl}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink className="h-3 w-3" />
+                  View Job
                 </a>
               )}
             </div>
+
             <div className="flex items-start gap-1">
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+                {/* FIX: Trigger is now the button itself.
+                    No nested Button component. */}
+                <DropdownMenuTrigger
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Open job application menu"
+                >
+                  <MoreVertical className="h-4 w-4" />
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setIsEditing(true)}>
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
-                  {columns.length > 1 && (
-                    <>
-                      {columns
-                        .filter((c) => c._id !== job.columnId)
-                        .map((column, key) => (
-                          <DropdownMenuItem
-                            key={key}
-                            onClick={() => handleMove(column._id)}
-                          >
-                            Move to {column.name}
-                          </DropdownMenuItem>
-                        ))}
-                    </>
-                  )}
+
+                  {columns.length > 1 &&
+                    columns
+                      .filter((c) => c._id !== job.columnId)
+                      .map((column) => (
+                        <DropdownMenuItem
+                          key={column._id}
+                          onClick={() => handleMove(column._id)}
+                        >
+                          Move to {column.name}
+                        </DropdownMenuItem>
+                      ))}
+
                   <DropdownMenuItem
                     className="text-destructive"
-                    onClick={() => handleDelete()}
+                    onClick={handleDelete}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -174,9 +205,12 @@ export default function JobApplicationCard({
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add Job Application</DialogTitle>
-            <DialogDescription>Track a new job application</DialogDescription>
+            <DialogTitle>Edit Job Application</DialogTitle>
+            <DialogDescription>
+              Update your job application details.
+            </DialogDescription>
           </DialogHeader>
+
           <form className="space-y-4" onSubmit={handleUpdate}>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -191,6 +225,7 @@ export default function JobApplicationCard({
                     }
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="position">Position *</Label>
                   <Input
@@ -203,6 +238,7 @@ export default function JobApplicationCard({
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
@@ -214,6 +250,7 @@ export default function JobApplicationCard({
                     }
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="salary">Salary</Label>
                   <Input
@@ -226,6 +263,7 @@ export default function JobApplicationCard({
                   />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="jobUrl">Job URL</Label>
                 <Input
@@ -238,6 +276,7 @@ export default function JobApplicationCard({
                   }
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input
@@ -249,6 +288,7 @@ export default function JobApplicationCard({
                   }
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -261,6 +301,7 @@ export default function JobApplicationCard({
                   }
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
@@ -282,7 +323,10 @@ export default function JobApplicationCard({
               >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+
+              <Button type="submit">
+                Save Changes
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
